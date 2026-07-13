@@ -4,9 +4,9 @@ Pull-OTA server for the greenhouse ventilation controller. Runs as PHP behind ng
 
 ## Wire contract
 
-This repository implements **wire contract v1.0** — frozen as **§4 of `design/rota_tds.md`** in the firmware repository, tag **`rota-contract-v1.0`**:
+This repository implements **wire contract v1.1** — frozen as **§4 of `design/rota_tds.md`** in the firmware repository, tag **`rota-contract-v1.1`**:
 
-> https://github.com/pe1mew/greenhouse-Controller — `design/rota_tds.md` §4 at tag `rota-contract-v1.0`
+> https://github.com/pe1mew/greenhouse-Controller — `design/rota_tds.md` §4 at tag `rota-contract-v1.1` — endpoints at the ota.rfsee.net root, no hbwv prefix
 
 The contract defines the endpoints, the `X-OTA-Auth` header (per-unit HMAC-SHA256), the manifest JSON schema, the audit codes, and the server store layout. Contract changes require a new contract version and coordinated changes in both repositories (TDS requirement R-T06).
 

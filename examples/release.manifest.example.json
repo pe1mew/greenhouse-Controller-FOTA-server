@@ -1,0 +1,14 @@
+{
+  "version": "2.2.0",
+  "seq": 30,
+  "unit_type": "ghc1",
+  "min_version": "2.1.0",
+  "key_id": "",
+  "fw_file": "greenhouse-controller-2.2.0.bin",
+  "fw_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "fw_size": 1360544,
+  "assets_file": "web-assets-2.2.0.zip",
+  "assets_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "assets_size": 108073,
+  "released_at": "2026-07-20T12:00:00Z"
+}
