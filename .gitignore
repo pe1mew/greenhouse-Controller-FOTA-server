@@ -1,0 +1,17 @@
+# R-T07: no credentials, keys, or runtime state in this repository — ever.
+*.pem
+*.key
+*.crt
+*.p12
+*.secret
+.deploy.env
+devices.json
+checkins.csv
+ota-store/
+*.log
+
+# editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
