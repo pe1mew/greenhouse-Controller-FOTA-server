@@ -1,0 +1,56 @@
+# ROTA OTA server — nginx server block (wire contract v1.1).
+# Drop-in for sites-available/ (symlink into sites-enabled/) — self-contained,
+# no external snippet needed.
+#
+# Deployment model: this repo is cloned in $HOME on the VPS and deployed from
+# there (tools/server-update.sh copies public/ into the webroot below). nginx
+# serves only the deployed copy, so the clone's .git/, tools/, nginx/ stay
+# private.
+#
+# TLS presents the PINNED self-signed certificate for ota.rfsee.net (TDS
+# R-A02/R5); the controller pins this exact cert. Cert/key are operator secret
+# material installed on the VPS — never committed to this repo (R-T07).
+#
+# Adjust the four /* ADJUST */ values for this VPS, then:
+#   sudo nginx -t && sudo systemctl reload nginx
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name ota.rfsee.net;                      # /* ADJUST if the host differs */
+
+    ssl_certificate     /etc/ssl/rota/ota_server.pem;   # /* ADJUST */ pinned self-signed cert
+    ssl_certificate_key /etc/ssl/rota/ota_server.key;   # /* ADJUST */ key, mode 0600 root-only
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    # Web root = the DEPLOYED copy of public/ (server-update.sh syncs it here
+    # from the clone). Never point this at the clone itself.
+    root /var/www/ota/public;                       # /* ADJUST */ = WEBROOT
+
+    # Where ota-store/ lives on disk (releases, devices.json, …), OUTSIDE the
+    # webroot. Passed to PHP as ROTA_STORE and used by the internal download
+    # location below. Keep the two in sync.
+    set $rota_store /var/www/ota-store;             # /* ADJUST */
+
+    # Defence in depth: never serve a dotfile/dir (blocks .git if the clone is
+    # ever mis-placed inside the webroot).
+    location ~ /\. { deny all; return 404; }
+
+    # The two contract endpoints — one PHP block for both; everything else 404s.
+    location ~ ^/(manifest|download)\.php$ {
+        try_files      $uri =404;                   # never hand a missing script to PHP-FPM
+        include        fastcgi_params;
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param  ROTA_STORE      $rota_store;
+        fastcgi_pass   unix:/run/php/php-fpm.sock;  # /* ADJUST */ e.g. php8.3-fpm.sock
+    }
+    location / { return 404; }
+
+    # Internal artefact streaming — download.php authenticates, then issues
+    #   X-Accel-Redirect: /ota-store-internal/releases/<version>/<file>
+    # and nginx sends the file. Not reachable directly (internal).
+    location /ota-store-internal/ {
+        internal;
+        alias /var/www/ota-store/;                  # /* ADJUST */ = $rota_store + trailing /
+    }
+}

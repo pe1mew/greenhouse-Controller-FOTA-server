@@ -52,10 +52,13 @@ repository onto this internet-facing host.
 cd ~/greenhouse-Controller-FOTA-server && tools/server-update.sh
 ```
 
-Copies `public/` to `WEBROOT`, stages `nginx/ota.conf` (adjust its paths for
-this VPS first: `root` → WEBROOT, cert/key → `/etc/ssl/rota/…`, `ota-store`
-alias), installs the PHP-FPM snippet, then `sudo nginx -t && sudo systemctl
-reload nginx`. Add the `ota.rfsee.net` DNS record if not yet present.
+Copies `public/` to `WEBROOT`. `nginx/ota.conf` is a **self-contained server
+block** — adjust its four `/* ADJUST */` values (server_name, cert/key paths,
+`root`=WEBROOT, `$rota_store` + the internal alias, PHP-FPM socket), then
+symlink it into `sites-enabled/` (or copy it to your conf dir) and
+`sudo nginx -t && sudo systemctl reload nginx`. Ensure `ota.rfsee.net` resolves
+to this VPS (a DNS record is only needed if it does not already, e.g. via a
+wildcard).
 
 ## 5. Updating later
 
