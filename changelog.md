@@ -3,14 +3,22 @@
 All notable changes to the **greenhouse-Controller FOTA server** are documented
 in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-This repository is versioned by the **ROTA wire contract** (frozen as §4 of
-`design/rota_tds.md` in the firmware repo, https://github.com/pe1mew/greenhouse-Controller).
-Server changes that do not alter the contract are listed under the current
-contract version.
+Server releases carry their own semantic version; each release states the
+frozen **ROTA wire contract** it implements (§4 of `design/rota_tds.md` in the
+firmware repo, https://github.com/pe1mew/greenhouse-Controller). The contract
+is versioned separately: changing it requires a new contract tag and
+coordinated updates in both repositories (R-T06). Early pre-release history
+(before server versioning was introduced) is listed under the contract tags at
+the bottom of this file.
 
 ---
 
-## Unreleased — wire contract v1.1
+## [1.0.0] — 2026-07-14 — implements wire contract v1.1
+
+First versioned server release — the state **currently deployed and running**
+at `https://ota.rfsee.net`: both wire-contract endpoints pass the
+`rota_sim.py` acceptance suite, releases flow in automatically from GitHub
+Releases to the soak channel, and operation is fully documented.
 
 ### Added
 - **Pull-based release distribution — `tools/ota-store-update.sh`** (2026-07-14).

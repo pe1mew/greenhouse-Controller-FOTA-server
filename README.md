@@ -51,7 +51,7 @@ The server's acceptance suite is the **device simulator** in the firmware reposi
 
 ## Status
 
-**Live** — deployed at `https://ota.rfsee.net` (wire contract v1.1). The endpoints are implemented and pass the `rota_sim.py` acceptance suite; a cron-driven retriever (`tools/ota-store-update.sh`) ships releases from GitHub Releases to the soak channel, and device check-ins + downloads are logged to `/var/log/rota-device.log`. See [changelog.md](changelog.md).
+**Live** — server release **v1.0.0**, deployed at `https://ota.rfsee.net` (implements wire contract v1.1). The endpoints are implemented and pass the `rota_sim.py` acceptance suite; a cron-driven retriever (`tools/ota-store-update.sh`) ships releases from GitHub Releases to the soak channel, and device check-ins + downloads are logged to `/var/log/rota-device.log`. See [changelog.md](changelog.md).
 
 ## License
 
