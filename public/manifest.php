@@ -24,6 +24,8 @@ rota_update_device($id, [
     'last_seen' => gmdate('c'),
     'fw_ver'    => rota_valid_version($fw) ? $fw : ($dev['fw_ver'] ?? null),
 ]);
+$lfw  = $fw  !== '' ? $fw  : '-';
+$lres = $res !== '' ? $res : '-';
 
 /* Resolve the offered version. */
 $offered = null;
@@ -38,12 +40,15 @@ if (!empty($dev['pinned_version']) && rota_valid_version((string)$dev['pinned_ve
     }
 }
 if ($offered === null || !rota_valid_version($offered)) {
+    rota_device_log("checkin id=$id fw=$lfw res=$lres -> no_release");
     rota_json(404, ['error' => 'no_release']);
 }
 
 /* Serve the stored release manifest (built by build_release.ps1 publish). */
 $manifest = rota_read_json(rota_store() . "/releases/{$offered}/manifest-{$offered}.json");
 if ($manifest === null) {
+    rota_device_log("checkin id=$id fw=$lfw res=$lres offered=$offered -> manifest_missing");
     rota_json(404, ['error' => 'manifest_missing', 'version' => $offered]);
 }
+rota_device_log("checkin id=$id fw=$lfw res=$lres offered=$offered");
 rota_json(200, $manifest);

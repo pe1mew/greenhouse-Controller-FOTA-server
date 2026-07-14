@@ -48,3 +48,17 @@ The server's acceptance suite is the **device simulator** in the firmware reposi
 ## Status
 
 **Scaffold only** (implementation-plan task 0.2). The endpoints return `501 Not Implemented`. Phase 1 (task 1.1–1.6 of `design/rotaImplementationPlan.md` in the firmware repo) fills in the implementation.
+
+## License
+
+See [license.md](license.md) for full details.
+
+**Software** (PHP, JavaScript, CSS, all code in this repository): Source-available, non-commercial. Free to use and modify for personal/non-commercial purposes; redistribution and commercial use are not permitted.
+
+**Documentation and design files**: Licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+
+## Disclaimer
+
+This project is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

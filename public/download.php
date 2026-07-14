@@ -39,6 +39,8 @@ if (!is_file($disk)) {
     rota_json(404, ['error' => 'artefact_missing']);
 }
 
+rota_device_log("download id=$id file=$file v=$v name=$name");
+
 header('Content-Type: application/octet-stream');
 header('Content-Disposition: attachment; filename="' . $name . '"');
 

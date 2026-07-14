@@ -103,6 +103,21 @@ function rota_record_checkin(string $id, string $fw, string $res): void {
     @file_put_contents(rota_store() . '/checkins.csv', $line, FILE_APPEND | LOCK_EX);
 }
 
+/**
+ * Append a timestamped line to the human-readable device-activity log
+ * (check-ins + downloads). Best-effort: a missing/unwritable log never blocks
+ * the response. Path from $ROTA_DEVICE_LOG (default /var/log/rota-device.log);
+ * control characters are stripped to prevent log injection from GET params.
+ */
+function rota_device_log(string $msg): void {
+    $path = getenv('ROTA_DEVICE_LOG');
+    if ($path === false || $path === '') {
+        $path = '/var/log/rota-device.log';
+    }
+    $msg = preg_replace('/[[:cntrl:]]+/', ' ', $msg);
+    @file_put_contents($path, gmdate('c') . ' ' . $msg . "\n", FILE_APPEND | LOCK_EX);
+}
+
 /* ── Nonce replay cache (flat-file, self-pruning) ───────────────────────*/
 
 function rota_nonce_first_use(string $nonce): bool {
