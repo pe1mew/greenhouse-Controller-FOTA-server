@@ -2,6 +2,8 @@
 
 Pull-OTA server for the greenhouse ventilation controller. Runs as PHP behind nginx on the operator's VPS and serves firmware/asset releases to controllers that authenticate per the ROTA wire contract.
 
+> **Full operator & administrator guide:** [`documentation/documentation.md`](documentation/documentation.md) — the whole ROTA chain end to end (delivery, actors, security model, setup, daily operation, unit management, and every config file).
+
 ## Wire contract
 
 This repository implements **wire contract v1.1** — frozen as **§4 of `design/rota_tds.md`** in the firmware repository, tag **`rota-contract-v1.1`**:
