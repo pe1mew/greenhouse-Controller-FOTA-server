@@ -15,9 +15,10 @@ The contract defines the endpoints, the `X-OTA-Auth` header (per-unit HMAC-SHA25
 | Path | Contents |
 |---|---|
 | `public/` | Web-reachable endpoints: `manifest.php`, `download.php` — nginx `root` points here |
-| `nginx/ota.conf` | Server-block fragment: TLS with the pinned certificate, PHP-FPM pass, `internal` location for `X-Accel-Redirect` downloads |
+| `nginx/ota.rfsee.net` | Server-block fragment: TLS with the pinned certificate, PHP-FPM pass, `internal` location for `X-Accel-Redirect` downloads |
 | `tools/bootstrap.md` | One-time VPS setup: read-only deploy key, clone outside webroot, runtime dirs |
-| `tools/server-update.sh` | Runs on the VPS: `git pull` (fast-forward) + nginx test/reload |
+| `tools/server-update.sh` | Runs on the VPS: `git pull` (fast-forward) + `sudo rsync` of `public/` into the webroot (PHP only; the nginx vhost is a one-time setup) |
+| `tools/ota-store-update.sh` | Runs on the VPS (cron): pulls the latest GitHub Release, verifies SHA-256, stages it into `ota-store/`, and points the soak channel |
 | `.github/workflows/lint.yml` | CI: PHP lint + R-T07 credential scan |
 
 **Not in this repository, by design (R-T07):** private keys, certificates, device secrets, the live device registry (`devices.json`), check-in logs, and release artefacts. Runtime state lives in `ota-store/` on the VPS (outside the webroot); secrets live in the operator's secret store. `.gitignore` enforces this and CI scans for violations.
@@ -36,7 +37,8 @@ machine. See **[tools/bootstrap.md](tools/bootstrap.md)** for one-time setup.
   local targets). The clone itself — `.git/`, `tools/`, `nginx/` — is never
   web-reachable.
 - **Update:** `cd ~/greenhouse-Controller-FOTA-server && tools/server-update.sh`
-  (fetch, fast-forward, copy, `nginx -t`, reload). Never touches `ota-store/`.
+  (fetch, fast-forward, `sudo rsync` `public/` into `WEBROOT`). Deploys the PHP
+  only — the nginx vhost is a one-time setup. Never touches `ota-store/`.
 - **Secrets:** the pinned cert/key are placed on the VPS **once, out of band**
   from the operator secret store (20-year cert). The credentials repository is
   **not** cloned onto this internet-facing host.
@@ -47,7 +49,7 @@ The server's acceptance suite is the **device simulator** in the firmware reposi
 
 ## Status
 
-**Scaffold only** (implementation-plan task 0.2). The endpoints return `501 Not Implemented`. Phase 1 (task 1.1–1.6 of `design/rotaImplementationPlan.md` in the firmware repo) fills in the implementation.
+**Live** — deployed at `https://ota.rfsee.net` (wire contract v1.1). The endpoints are implemented and pass the `rota_sim.py` acceptance suite; a cron-driven retriever (`tools/ota-store-update.sh`) ships releases from GitHub Releases to the soak channel, and device check-ins + downloads are logged to `/var/log/rota-device.log`. See [changelog.md](changelog.md).
 
 ## License
 
