@@ -65,3 +65,32 @@ wildcard).
 ```bash
 cd ~/greenhouse-Controller-FOTA-server && tools/server-update.sh
 ```
+
+## 6. Automated release pull (ROTA soak)
+
+`tools/ota-store-update.sh` polls the firmware repo's **GitHub Releases** and
+pulls the latest one into `ota-store/` — the pull half of the release toolchain
+(the firmware repo's `bin/rota_release.py release` is the push half). The repo
+is public, so fetches are tokenless: **no VPS-write key ever goes to GitHub**
+(R-T07). Deps: `curl`, `php` (already required by the server), `sha256sum`.
+
+It skips releases with no `manifest-<version>.json` asset (legacy / non-ROTA),
+downloads the manifest + artefacts, **verifies sha256 + size before staging**,
+stages atomically into `releases/<version>/`, then points `channels/soak.json`
+at a **full** release. A GitHub **pre-release** is staged *without* pointing
+soak. **Mainstream is never pointed here** — promotion stays a manual step
+(`rota_release.py promote`). Then it runs `prune-releases.sh` (R-S08).
+
+Run it once by hand, then schedule it (10 min is fine — apply happens in the
+device's night window, so pull latency is irrelevant):
+
+```bash
+tools/ota-store-update.sh /var/www/ota-store            # manual
+
+# crontab -e
+*/10 * * * * /home/<user>/greenhouse-Controller-FOTA-server/tools/ota-store-update.sh /var/www/ota-store >> /var/log/rota-pull.log 2>&1
+```
+
+Optional env: `GH_TOKEN` (raises the 60/hr tokenless rate limit), `ROTA_KEEP`
+(releases retained, default 5), `--stage-prereleases` (also stage prereleases),
+`GH_API_BASE` (override the repo/base — used by the test harness).
