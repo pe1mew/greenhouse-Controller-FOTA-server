@@ -29,7 +29,8 @@ ssh-keyscan github.com >> ~/.ssh/known_hosts                # pin host key (veri
 cd ~
 git clone git@github-rota:pe1mew/greenhouse-Controller-FOTA-server.git
 cd greenhouse-Controller-FOTA-server
-cp tools/server.env.example .server.env    # fill in WEBROOT + NGINX_CONF_DIR (git-ignored)
+# Optional — only if your webroot differs from the /var/www/ota/public default:
+cp tools/server.env.example .server.env    # git-ignored; set WEBROOT
 ```
 
 ## 3. Runtime state and secrets (NOT in the repo — R-T07)
@@ -48,17 +49,23 @@ repository onto this internet-facing host.
 
 ## 4. First deploy
 
+**nginx vhost (one-time).** `nginx/ota.rfsee.net` is a **self-contained server
+block** — adjust its `/* ADJUST */` values (server_name, cert/key paths,
+`root`=WEBROOT, `$rota_store` + the internal alias, and the **PHP-FPM socket** —
+match your version, e.g. `/run/php/php8.2-fpm.sock`), then symlink it into
+`sites-enabled/` (or copy it to your conf dir) and
+`sudo nginx -t && sudo systemctl reload nginx`. Ensure `ota.rfsee.net` resolves
+to this VPS. `server-update.sh` never re-copies this file, so your adjusted
+values are safe across deploys.
+
+**Deploy the PHP:**
+
 ```bash
 cd ~/greenhouse-Controller-FOTA-server && tools/server-update.sh
 ```
 
-Copies `public/` to `WEBROOT`. `nginx/ota.conf` is a **self-contained server
-block** — adjust its four `/* ADJUST */` values (server_name, cert/key paths,
-`root`=WEBROOT, `$rota_store` + the internal alias, PHP-FPM socket), then
-symlink it into `sites-enabled/` (or copy it to your conf dir) and
-`sudo nginx -t && sudo systemctl reload nginx`. Ensure `ota.rfsee.net` resolves
-to this VPS (a DNS record is only needed if it does not already, e.g. via a
-wildcard).
+This fast-forwards the clone and `sudo rsync`s `public/` into `WEBROOT` — the PHP
+endpoints only (the nginx vhost is the manual step above).
 
 ## 5. Updating later
 

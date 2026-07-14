@@ -1,47 +1,39 @@
 #!/usr/bin/env bash
-# ROTA server update — runs ON the VPS, from the clone in $HOME.
+# ROTA server update -- runs ON the VPS, from the clone in $HOME.
 #
 # Deployment model (R-T07): this repo is cloned in the VPS user's home
-# directory and DEPLOYED FROM THERE — a fast-forward `git pull` followed by
-# a local copy of public/ into the webroot and the nginx fragment into the
-# nginx config dir. nginx never serves the clone itself; only the copied
-# public/ files are web-reachable, so .git/, tools/, nginx/ stay private.
+# directory and DEPLOYED FROM THERE -- a fast-forward `git pull` followed by a
+# copy of public/ into the webroot. nginx never serves the clone itself; only
+# the copied public/ files are web-reachable, so .git/, tools/, nginx/ stay
+# private.
 #
-# Local deploy targets come from the git-ignored `.server.env` in the clone
-# root (see tools/server.env.example). Secrets and runtime state (cert/key,
-# ota-store/) are never touched by this script.
+# This script deploys ONLY the PHP endpoints (public/). The nginx vhost is a
+# one-time setup (see tools/bootstrap.md) whose /* ADJUST */ values (server_name,
+# cert/key, php-fpm socket, roots) are VPS-specific -- so this script must NOT
+# re-copy nginx/ota.rfsee.net, or it would clobber those live values. When the
+# vhost genuinely changes, copy it + `sudo nginx -t && sudo systemctl reload
+# nginx` by hand.
+#
+# Deploy target comes from the git-ignored `.server.env` (tools/server.env.example)
+# if present, else the standard-layout default below. Secrets and runtime state
+# (cert/key, ota-store/) are never touched here.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ENV_FILE=".server.env"
-if [[ ! -f "$ENV_FILE" ]]; then
-    echo "ERROR: $ENV_FILE missing — copy tools/server.env.example and fill it in." >&2
-    exit 1
-fi
 # shellcheck disable=SC1090
-source "$ENV_FILE"
-: "${WEBROOT:?set in .server.env}"          # e.g. /var/www/ota/public
-: "${NGINX_CONF_DIR:?set in .server.env}"   # e.g. /etc/nginx/sites-available or snippets dir
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+: "${WEBROOT:=/var/www/ota/public}"   # override in .server.env for a non-standard VPS
 
 echo "== fetch + fast-forward only (no local commits expected on the VPS)"
 git fetch --tags origin
 git merge --ff-only origin/main
 
-echo "== deploy public/ -> ${WEBROOT}"
-mkdir -p "$WEBROOT"
-rsync -a --delete public/ "${WEBROOT}/"
-
-echo "== stage nginx fragment -> ${NGINX_CONF_DIR}/ota.conf"
-cp nginx/ota.conf "${NGINX_CONF_DIR}/ota.conf"
-
-if command -v nginx >/dev/null 2>&1; then
-    echo "== nginx config test + reload"
-    sudo nginx -t
-    sudo systemctl reload nginx
-else
-    echo "   nginx not found in PATH — test/reload manually"
-fi
+echo "== deploy public/ -> ${WEBROOT}  (sudo: webroot is not owned by \$USER)"
+sudo mkdir -p "$WEBROOT"
+sudo rsync -a --delete public/ "${WEBROOT}/"
 
 echo "== deployed contract version: $(git describe --tags --always)"
-echo "== done"
+echo "== done. PHP is live (php-fpm picks up changed files on mtime; if opcache"
+echo "   is aggressive, 'sudo systemctl reload php*-fpm'). nginx vhost untouched."
