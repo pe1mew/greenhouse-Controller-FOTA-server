@@ -53,8 +53,18 @@ jasset()  { php -r '$d=json_decode(stream_get_contents(STDIN),true); foreach(($d
 jchanver(){ php -r '$d=json_decode(file_get_contents($argv[1]),true); echo $d[$argv[2]]["version"]??"";' "$1" "$2" 2>/dev/null || true; }
 
 # --- 1. pick the release to consider ---------------------------------------
+# Default: /releases/latest = newest NON-prerelease, NON-draft. GitHub excludes
+# pre-releases from /latest, so with --stage-prereleases fetch the /releases list
+# (newest-first by created_at) and take the newest entry instead.
 REL="$TMP/release.json"
-if ! "${CURL[@]}" "$GH_API_BASE/releases/latest" -o "$REL" 2>/dev/null; then
+if [ "$STAGE_PRE" = "1" ]; then
+    if ! "${CURL[@]}" "$GH_API_BASE/releases?per_page=1" -o "$TMP/list.json" 2>/dev/null; then
+        log "release list fetch failed -- nothing to do"; exit 0
+    fi
+    php -r '$a=json_decode(stream_get_contents(STDIN),true); if(is_array($a)&&!empty($a[0])) echo json_encode($a[0]);' \
+        < "$TMP/list.json" > "$REL"
+    [ -s "$REL" ] || { log "no releases found -- nothing to do"; exit 0; }
+elif ! "${CURL[@]}" "$GH_API_BASE/releases/latest" -o "$REL" 2>/dev/null; then
     log "no latest release available (or fetch failed) -- nothing to do"; exit 0
 fi
 TAG="$(jfield tag_name < "$REL")"
