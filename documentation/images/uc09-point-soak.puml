@@ -1,0 +1,23 @@
+@startuml uc09-point-soak
+left to right direction
+skinparam shadowing false
+title UC9 - Point soak (automatic)
+
+actor "Retriever\n(ota-store-update.sh, cron)" as ret
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Point channels/soak.json\n[unit_type] to the new version" as UC9
+  usecase "Monotonic seq guard\n(never downgrade)" as GRD
+  usecase "Skip: pre-release\n(staged only)" as PRE
+}
+
+ret --> UC9
+UC9 ..> GRD : <<include>>
+PRE ..> UC9 : <<extend>>\n(prerelease flag)
+
+note right of GRD
+  A candidate with seq <= the
+  current soak seq is staged
+  but soak is not moved
+end note
+@enduml

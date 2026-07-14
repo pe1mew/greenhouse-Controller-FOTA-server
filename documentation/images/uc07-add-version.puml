@@ -1,0 +1,30 @@
+@startuml uc07-add-version
+left to right direction
+skinparam shadowing false
+title UC7 - Add a version to the pool
+
+actor Operator as op
+actor "GitHub\n(releases API)" as gh
+actor "Retriever\n(ota-store-update.sh, cron)" as ret
+
+usecase "Publish GitHub release\n(manifest + fw + assets)" as PUB
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Poll for newest\nROTA release" as POLL
+  usecase "Verify sha256 + size\nagainst the manifest" as VER
+  usecase "Stage atomically into\nreleases/<version>/" as STG
+}
+
+op --> PUB
+PUB -- gh
+ret --> POLL
+POLL -- gh
+POLL ..> STG : <<include>>\n(new seq)
+STG ..> VER : <<include>>
+
+note right of VER
+  Verify-before-stage: a corrupt
+  or tampered artefact never
+  reaches the pool
+end note
+@enduml

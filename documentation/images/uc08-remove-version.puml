@@ -1,0 +1,26 @@
+@startuml uc08-remove-version
+left to right direction
+skinparam shadowing false
+title UC8 - Remove a version from the pool
+
+actor "Retriever\n(prune-releases.sh)" as ret
+actor Operator as op
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Prune old releases\n(keep newest ROTA_KEEP)" as UC8
+  usecase "Skip versions referenced\nby a stream or a pin" as SKIP
+}
+
+usecase "Re-publish from the firmware\nrepo's master copies" as REC
+
+ret --> UC8
+UC8 ..> SKIP : <<include>>
+op --> REC
+REC ..> UC8 : <<extend>>\n(recover a pruned release)
+
+note right of SKIP
+  A pinned or pointed-at release
+  is never pruned, so holding
+  production old is always safe
+end note
+@enduml

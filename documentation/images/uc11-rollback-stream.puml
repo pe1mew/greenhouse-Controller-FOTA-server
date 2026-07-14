@@ -1,0 +1,23 @@
+@startuml uc11-rollback-stream
+left to right direction
+skinparam shadowing false
+title UC11 - Force / roll back a stream
+
+actor Operator as op
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Hand-edit\nchannels/<stream>.json" as UC11
+  usecase "Point stream to an older\nstaged version" as OLD
+  usecase "Pin affected units\ninstead" as PINALT
+}
+
+op --> UC11
+UC11 ..> OLD : <<include>>
+PINALT ..> UC11 : <<extend>>\n(per-unit alternative)
+
+note right of OLD
+  The retriever refuses to
+  downgrade, so rollback is
+  always an explicit human act
+end note
+@enduml

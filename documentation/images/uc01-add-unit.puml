@@ -1,0 +1,27 @@
+@startuml uc01-add-unit
+left to right direction
+skinparam shadowing false
+title UC1 - Add a unit
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+usecase "Provision secret + URL\non the device" as PROV
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Add unit record\nto devices.json" as UC1
+  usecase "Generate per-unit\nota_secret" as GEN
+  usecase "Authenticate check-in\n(HMAC, X-OTA-Auth)" as AUTH
+}
+
+op --> UC1
+UC1 ..> GEN : <<include>>
+UC1 ..> PROV : <<include>>
+dev --> AUTH
+
+note right of AUTH
+  Succeeds only once the record
+  exists, matches the provisioned
+  secret, and enabled = true
+end note
+@enduml

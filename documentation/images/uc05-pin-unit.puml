@@ -1,0 +1,25 @@
+@startuml uc05-pin-unit
+left to right direction
+skinparam shadowing false
+title UC5 - Pin a unit to a version
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Set pinned_version\nin devices.json" as UC5
+  usecase "Check in\n(manifest.php)" as CHK
+  usecase "Offer exactly the\npinned version" as PIN
+  usecase "Protect release\nfrom pruning" as KEEP
+}
+
+op --> UC5
+dev --> CHK
+CHK ..> PIN : <<include>>\n(pin set)
+UC5 ..> KEEP : <<include>>
+
+note right of PIN
+  Overrides the channel matrix
+  entirely while the pin is set
+end note
+@enduml

@@ -1,0 +1,26 @@
+@startuml uc10-promote-mainstream
+left to right direction
+skinparam shadowing false
+title UC10 - Promote to mainstream (manual)
+
+actor Operator as op
+actor "Soak unit\n(bench)" as dev
+
+usecase "Judge the soak run\n(bench unit behaviour)" as JUDGE
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Promote version\n(rota_release.py promote)" as UC10
+  usecase "Point channels/\nmainstream.json[unit_type]" as PT
+}
+
+dev -- JUDGE
+op --> JUDGE
+op --> UC10
+UC10 ..> PT : <<include>>
+
+note right of UC10
+  Never automated: the human
+  gate between staging and
+  production
+end note
+@enduml

@@ -1,0 +1,28 @@
+@startuml uc12-inspect-state
+left to right direction
+skinparam shadowing false
+title UC12 - Inspect state (observation)
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Show channel status\n(rota_release.py status)" as ST
+  usecase "Review last_seen / fw_ver\nin devices.json" as TEL
+  usecase "Read rota-device.log\nand checkins.csv" as LOG
+  usecase "Check in\n(manifest.php)" as CHK
+  usecase "Record telemetry\n+ activity log line" as REC
+}
+
+op --> ST
+op --> TEL
+op --> LOG
+dev --> CHK
+CHK ..> REC : <<include>>
+
+note right of TEL
+  No state is changed; used to
+  verify that UC1-UC11 actually
+  took effect after a check-in
+end note
+@enduml

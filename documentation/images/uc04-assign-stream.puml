@@ -1,0 +1,24 @@
+@startuml uc04-assign-stream
+left to right direction
+skinparam shadowing false
+title UC4 - Assign a unit to a stream
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Set channel field\n(soak | mainstream)" as UC4
+  usecase "Check in\n(manifest.php)" as CHK
+  usecase "Resolve version from\nchannels/<channel>.json[unit_type]" as RES
+}
+
+op --> UC4
+dev --> CHK
+CHK ..> RES : <<include>>
+
+note right of UC4
+  Takes effect on the unit's next
+  check-in; absent channel defaults
+  to mainstream
+end note
+@enduml

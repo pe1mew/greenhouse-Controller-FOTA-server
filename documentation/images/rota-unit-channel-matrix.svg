@@ -1,0 +1,59 @@
+<svg width="680" height="320" viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>How a unit resolves to a firmware version</title>
+  <desc>Each unit record in devices.json holds a channel and a unit type. Those two values select one cell in the channel matrix, where streams are rows and unit types are columns. Each cell holds a single version pointer into the releases pool.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+      .th { font-size: 14px; font-weight: 600; fill: #2C2C2A; }
+      .ts { font-size: 12px; font-weight: 400; fill: #5F5E5A; }
+      .box { fill: #FFFFFF; stroke: #888780; stroke-width: 0.75; }
+      .arr { stroke: #5F5E5A; stroke-width: 1.5; }
+      .container { fill: none; stroke: #B4B2A9; stroke-width: 0.75; stroke-dasharray: 4 4; }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="680" height="320" fill="#FDFCFA"/>
+
+  <rect class="container" x="40" y="40" width="200" height="240" rx="12"/>
+  <text class="th" x="140" y="64" text-anchor="middle" dominant-baseline="central">devices.json</text>
+  <text class="ts" x="140" y="82" text-anchor="middle" dominant-baseline="central">one record per unit</text>
+
+  <rect class="container" x="260" y="40" width="190" height="240" rx="12"/>
+  <text class="th" x="355" y="64" text-anchor="middle" dominant-baseline="central">channels/</text>
+  <text class="ts" x="355" y="82" text-anchor="middle" dominant-baseline="central">streams × unit types</text>
+
+  <rect class="container" x="470" y="40" width="170" height="240" rx="12"/>
+  <text class="th" x="555" y="64" text-anchor="middle" dominant-baseline="central">releases/</text>
+  <text class="ts" x="555" y="82" text-anchor="middle" dominant-baseline="central">verified artefacts</text>
+
+  <rect class="box" x="55" y="108" width="170" height="56" rx="8"/>
+  <text class="th" x="140" y="126" text-anchor="middle" dominant-baseline="central">a0b1c2d3e4f5</text>
+  <text class="ts" x="140" y="144" text-anchor="middle" dominant-baseline="central">bench · soak · ghc1</text>
+
+  <rect class="box" x="55" y="194" width="170" height="56" rx="8"/>
+  <text class="th" x="140" y="212" text-anchor="middle" dominant-baseline="central">5c88aabbccdd</text>
+  <text class="ts" x="140" y="230" text-anchor="middle" dominant-baseline="central">prod · mainstream</text>
+
+  <text class="ts" x="355" y="100" text-anchor="middle" dominant-baseline="central">unit_type: ghc1</text>
+
+  <rect x="305" y="108" width="100" height="56" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.75"/>
+  <text x="355" y="126" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#085041">2.2.13</text>
+  <text x="355" y="144" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#0F6E56">soak</text>
+
+  <rect x="305" y="194" width="100" height="56" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.75"/>
+  <text x="355" y="212" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="600" fill="#3C3489">2.2.0</text>
+  <text x="355" y="230" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#534AB7">mainstream</text>
+
+  <rect class="box" x="485" y="114" width="140" height="44" rx="8"/>
+  <text class="th" x="555" y="136" text-anchor="middle" dominant-baseline="central">2.2.13/</text>
+
+  <rect class="box" x="485" y="200" width="140" height="44" rx="8"/>
+  <text class="th" x="555" y="222" text-anchor="middle" dominant-baseline="central">2.2.0/</text>
+
+  <line x1="229" y1="136" x2="301" y2="136" class="arr" marker-end="url(#arrow)"/>
+  <line x1="229" y1="222" x2="301" y2="222" class="arr" marker-end="url(#arrow)"/>
+  <line x1="409" y1="136" x2="481" y2="136" class="arr" marker-end="url(#arrow)"/>
+  <line x1="409" y1="222" x2="481" y2="222" class="arr" marker-end="url(#arrow)"/>
+</svg>

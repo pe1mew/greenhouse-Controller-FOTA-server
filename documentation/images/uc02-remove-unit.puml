@@ -1,0 +1,26 @@
+@startuml uc02-remove-unit
+left to right direction
+skinparam shadowing false
+title UC2 - Remove a unit (hard)
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+usecase "Set ota_enable=0\non the device" as OFF
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Delete unit record\nfrom devices.json" as UC2
+  usecase "Retire the unit's\nota_secret" as RET
+  usecase "Reject check-in\nsilently (204)" as REJ
+}
+
+op --> UC2
+UC2 ..> RET : <<include>>
+UC2 ..> OFF : <<extend>>\n(device reachable)
+dev --> REJ
+
+note right of REJ
+  After deletion the id is unknown:
+  every request gets 204 forever
+end note
+@enduml

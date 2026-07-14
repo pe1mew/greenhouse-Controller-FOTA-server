@@ -1,0 +1,24 @@
+@startuml uc06-unpin-unit
+left to right direction
+skinparam shadowing false
+title UC6 - Unpin a unit
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Clear pinned_version\n(set to null)" as UC6
+  usecase "Check in\n(manifest.php)" as CHK
+  usecase "Resolve version from\nthe channel matrix again" as RES
+}
+
+op --> UC6
+dev --> CHK
+CHK ..> RES : <<include>>\n(no pin)
+
+note right of UC6
+  The deliberate act that lets a
+  held (production) unit move to
+  whatever its stream offers
+end note
+@enduml

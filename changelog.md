@@ -32,6 +32,21 @@ contract version.
   keeps **12** compressed generations, and recreates each `0664
   www-data:www-data` so PHP and the cron keep writing. Install once to
   `/etc/logrotate.d/rota` (see `tools/bootstrap.md` §7).
+- **Unit-management guide — `documentation/unitManagement.md`** (2026-07-14).
+  The mental model: how a unit is managed in `devices.json`, the **streams ×
+  unit-type channel matrix** (with the version pool fed from GitHub Releases),
+  and check-in version resolution — with two overview SVG diagrams. Includes a
+  **use-case catalogue** (12 use cases: unit registry, version pool, streams,
+  observation) and a **PlantUML use-case diagram per use case** with a
+  comprehensive description; `.puml` sources + rendered PNGs in
+  `documentation/images/`.
+- **CLI manual — `documentation/cliManual.md`** (2026-07-14). Comprehensive
+  manual of the ROTA command-line tooling: the dev-machine release toolchain
+  (`rota_release.py` subcommands/options/`seq` guard, `rota_sim.py`,
+  `ota_push.py`) and the VPS scripts (`init-store.sh`, `ota-store-update.sh`,
+  `prune-releases.sh`, `server-update.sh`, `rota-logrotate`), the registry
+  hand-edit pattern (UC1–UC6), and a **use case → command mapping** with worked
+  examples, cross-linked per use case to `unitManagement.md`.
 
 ### Changed
 - **`tools/server-update.sh`** (2026-07-14) now deploys **only** `public/`

@@ -1,0 +1,23 @@
+@startuml uc03-enable-disable-unit
+left to right direction
+skinparam shadowing false
+title UC3 - Enable / disable a unit (soft stop)
+
+actor Operator as op
+actor "Unit (device)" as dev
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Toggle enabled flag\nin devices.json" as UC3
+  usecase "Check in\n(manifest.php)" as CHK
+  usecase "Reject silently (204),\nno telemetry recorded" as REJ
+}
+
+op --> UC3
+dev --> CHK
+CHK ..> REJ : <<extend>>\n(enabled = false)
+
+note right of UC3
+  Reversible: the record, channel,
+  pin and secret are all kept
+end note
+@enduml
