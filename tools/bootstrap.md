@@ -101,3 +101,20 @@ tools/ota-store-update.sh /var/www/ota-store            # manual
 Optional env: `GH_TOKEN` (raises the 60/hr tokenless rate limit), `ROTA_KEEP`
 (releases retained, default 5), `--stage-prereleases` (also stage prereleases),
 `GH_API_BASE` (override the repo/base — used by the test harness).
+
+## 7. Log rotation
+
+`tools/rota-logrotate` rotates the two runtime logs — the retriever's cron log
+(`/var/log/rota-pull.log`) and the device-activity log
+(`/var/log/rota-device.log`). Install it once:
+
+```bash
+sudo install -m 0644 tools/rota-logrotate /etc/logrotate.d/rota
+sudo logrotate --debug /etc/logrotate.d/rota      # dry-run: confirm it parses
+```
+
+Both logs are written by **www-data** (the PHP endpoints and the cron), so the
+config recreates each one `0664 www-data:www-data` after rotation — the writers
+open per-write, so there is no lost-handle problem and no `copytruncate`. It
+keeps **12 weekly** compressed generations. The system's daily `logrotate` run
+(`logrotate.timer` / `cron.daily`) applies it automatically — nothing to enable.

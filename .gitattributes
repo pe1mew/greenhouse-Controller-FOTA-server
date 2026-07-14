@@ -1,0 +1,6 @@
+# Files executed on / deployed to the Linux VPS must keep LF line endings even
+# when committed from a Windows checkout. CRLF in a shell script or a logrotate
+# config (a trailing \r on a path or directive) breaks them at runtime.
+*.sh                 text eol=lf
+*.php                text eol=lf
+tools/rota-logrotate text eol=lf

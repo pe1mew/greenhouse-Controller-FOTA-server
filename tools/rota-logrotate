@@ -1,0 +1,25 @@
+# ROTA server log rotation
+# Install:  sudo install -m 0644 tools/rota-logrotate /etc/logrotate.d/rota
+#
+# Rotates the retriever's cron log (ota-store-update.sh) and the device-activity
+# log (manifest.php / download.php). Both are written by www-data, so each is
+# recreated 0664 www-data:www-data after rotation — PHP and the cron keep
+# appending to the fresh file (they open per-write, so no copytruncate needed).
+# Applied automatically by the system's daily logrotate run; nothing to enable.
+#
+# `su root root`: /var/log is group-writable (root:syslog 0775, the standard
+# rsyslog layout), and logrotate refuses to rotate under a non-root-writable
+# parent unless told which user to rotate as. Root renames/creates in /var/log;
+# the `create` line still hands the fresh log back to www-data.
+/var/log/rota-pull.log
+/var/log/rota-device.log
+{
+    su root root
+    weekly
+    rotate 12
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0664 www-data www-data
+}

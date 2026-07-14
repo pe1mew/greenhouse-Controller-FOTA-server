@@ -27,6 +27,11 @@ contract version.
   check-in (device id, reported firmware, last audit outcome, offered version);
   `download.php` logs each artefact served. Failed auth (`204`) stays silent by
   design. Log path from `$ROTA_DEVICE_LOG` (default `/var/log/rota-device.log`).
+- **Log rotation — `tools/rota-logrotate`** (2026-07-14). logrotate config for
+  the two runtime logs: rotates `rota-pull.log` + `rota-device.log` **weekly**,
+  keeps **12** compressed generations, and recreates each `0664
+  www-data:www-data` so PHP and the cron keep writing. Install once to
+  `/etc/logrotate.d/rota` (see `tools/bootstrap.md` §7).
 
 ### Changed
 - **`tools/server-update.sh`** (2026-07-14) now deploys **only** `public/`
