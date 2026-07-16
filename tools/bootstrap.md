@@ -118,3 +118,19 @@ config recreates each one `0664 www-data:www-data` after rotation — the writer
 open per-write, so there is no lost-handle problem and no `copytruncate`. It
 keeps **12 weekly** compressed generations. The system's daily `logrotate` run
 (`logrotate.timer` / `cron.daily`) applies it automatically — nothing to enable.
+
+## 8. Store health check
+
+`tools/ota-store-check.sh` is a read-only lint of the whole store —
+`devices.json`, the channel files, and every staged release (manifest fields;
+artefact sizes + SHA-256; `seq` uniqueness). Run it after the initial
+provisioning, after **every** `devices.json` hand-edit, and as the first
+diagnostic when units unexpectedly get 204/404 (a malformed `devices.json`
+fails **closed**: every unit gets 204):
+
+```bash
+sudo -u www-data ~/greenhouse-Controller-FOTA-server/tools/ota-store-check.sh /var/www/ota-store
+```
+
+Exit `0` = healthy (warnings allowed), `1` = errors. `--quick` skips the
+SHA-256 pass. It never writes to the store and never prints a secret value.

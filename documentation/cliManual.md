@@ -11,7 +11,7 @@ The tooling lives in two places, matching the trust split:
 | Location | Tools | Runs |
 |---|---|---|
 | **Dev machine** — firmware repo `greenhouse-Controller/bin/` | `build_release.ps1`, `rota_release.py`, `rota_sim.py`, (`ota_push.py`) | Building, publishing, promoting, verifying |
-| **VPS** — this repo `tools/` | `init-store.sh`, `ota-store-update.sh`, `prune-releases.sh`, `server-update.sh`, `rota-logrotate` | Store bootstrap, automatic pull/stage, retention, server deploy, log rotation |
+| **VPS** — this repo `tools/` | `init-store.sh`, `ota-store-update.sh`, `prune-releases.sh`, `ota-store-check.sh`, `server-update.sh`, `rota-logrotate` | Store bootstrap, automatic pull/stage, retention, store lint, server deploy, log rotation |
 
 Registry edits (unit use cases UC1–UC6) have **no dedicated CLI by design** —
 they are small, auditable hand-edits to `devices.json` on the VPS; see
@@ -210,6 +210,25 @@ A pruned release is recoverable: the firmware repo's `bin/<version>/` is the
 master copy — re-run `rota_release.py publish <version>` (it reuses the
 original `seq`).
 
+### `ota-store-check.sh` — store health check (UC13)
+
+Read-only syntax + consistency lint of the whole store: `devices.json` (valid
+JSON, 12-hex ids, secrets set — values never printed, channels known, pins
+staged, not world-readable), `channels/*.json` (shape; pointed versions
+staged with manifests), every `releases/<v>/` (manifest fields; artefact
+presence, size and SHA-256; `seq` uniqueness), enabled-unit resolution, and
+`checkins.csv` line format. Exit `0` = healthy (warnings allowed), `1` =
+errors — cron-friendly. Never writes; never prints a secret value.
+
+```bash
+sudo -u www-data tools/ota-store-check.sh /var/www/ota-store            # full check
+sudo -u www-data tools/ota-store-check.sh /var/www/ota-store --quick    # skip sha256
+```
+
+Run it after **every** registry hand-edit (UC1–UC6), after a manual stream
+edit (UC11), and as the first diagnostic when units unexpectedly get 204/404
+— a malformed `devices.json` fails **closed** and 204s every unit.
+
 ### `server-update.sh` — deploy the PHP server
 
 Updates the *server code*, not the store: fast-forward `git pull` of this
@@ -246,9 +265,8 @@ a human in the loop is the point. General pattern:
 ```bash
 ssh ota-vps
 sudoedit /var/www/ota-store/devices.json
-# validate after every edit — a syntax error breaks auth for ALL units:
-php -r 'exit(json_decode(file_get_contents("/var/www/ota-store/devices.json"))===null?1:0);' \
-    && echo OK || echo BROKEN
+# validate after every edit — a syntax error breaks auth for ALL units (UC13):
+sudo -u www-data ~/greenhouse-Controller-FOTA-server/tools/ota-store-check.sh /var/www/ota-store
 ```
 
 Changes take effect on each unit's next check-in; nothing needs restarting.
@@ -463,6 +481,27 @@ grep -A2 '"5c88aabbccdd"' /var/www/ota-store/devices.json   # last_seen / fw_ver
 python bin/rota_sim.py --base-url https://ota.rfsee.net --cert <pem> \
     --id <mac> --secret-file <path>                     # full contract check
 ```
+
+### UC13 — Validate the store (observation)
+
+*Described in [unitManagement.md § UC13](unitManagement.md#uc13--validate-the-store-observation).*
+
+Tool: `tools/ota-store-check.sh` (VPS) — the read-only companion to UC12:
+where UC12 asks *what is the system doing*, UC13 asks *is the store itself
+well-formed and consistent*.
+
+```bash
+ssh ota-vps
+sudo -u www-data ~/greenhouse-Controller-FOTA-server/tools/ota-store-check.sh /var/www/ota-store
+# [ OK ] devices.json: valid JSON, 3 unit(s), 3 enabled
+# [ OK ] soak.json [ghc1] -> 2.2.14 (staged, manifest present)
+# [ OK ] releases/2.2.14: greenhouse-controller-2.2.14.bin size + sha256 match
+# ...
+# == summary: 0 error(s), 0 warning(s) ==            exit 0 = healthy, 1 = errors
+```
+
+Run it after every hand-edit (UC1–UC6, UC11) and as the first step of any
+"units suddenly get 204/404" diagnosis; `--quick` skips the SHA-256 pass.
 
 ---
 

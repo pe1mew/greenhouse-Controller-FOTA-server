@@ -63,7 +63,12 @@ Releases to the soak channel, and operation is fully documented.
   `--quick` skips hashes; `seq` uniqueness), enabled-unit resolution, and
   `checkins.csv` line format. Exit 0/1 (cron-friendly); run as
   `sudo -u www-data`. A malformed `devices.json` fails closed (every unit
-  gets 204) — this catches it before a unit does.
+  gets 204) — this catches it before a unit does. Documented as **UC13 —
+  Validate the store** (observation) across the doc set: `unitManagement.md`
+  (catalogue row + diagram, source `images/uc13-validate-store.puml`),
+  `cliManual.md` (script section, UC13 mapping, and the registry-edit
+  validation step now uses it), `tools/bootstrap.md` §8, and
+  `documentation.md` (§11.1 edit recipe, §13 troubleshooting, §14 reference).
 
 ### Changed
 - **`tools/server-update.sh`** (2026-07-14) now deploys **only** `public/`

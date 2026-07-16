@@ -1,0 +1,30 @@
+@startuml uc13-validate-store
+left to right direction
+skinparam shadowing false
+title UC13 - Validate the store (observation)
+
+actor Operator as op
+actor "Cron (optional)" as cron
+
+rectangle "ROTA server (ota-store)" {
+  usecase "Run ota-store-check.sh\n(read-only lint)" as RUN
+  usecase "Validate devices.json\n(JSON, 12-hex ids, secrets set,\nchannels known, pins staged)" as DEV
+  usecase "Validate channels/*.json\n(shape, pointed versions staged)" as CHAN
+  usecase "Verify releases/<v>/\n(manifest fields, artefact\nsize + sha256, seq unique)" as REL
+  usecase "Report [OK]/[WARN]/[FAIL]\nexit 0 / 1" as REP
+}
+
+op --> RUN
+cron --> RUN
+RUN ..> DEV : <<include>>
+RUN ..> CHAN : <<include>>
+RUN ..> REL : <<include>>
+RUN ..> REP : <<include>>
+
+note right of DEV
+  A malformed devices.json fails
+  CLOSED (every unit gets 204) --
+  run after every hand-edit
+  (UC1-UC6, UC11)
+end note
+@enduml

@@ -605,6 +605,7 @@ means firmware installed but assets did not — investigate before trusting the 
 | Downloads but never installs | device `GET /api/ota/check` (`apply` field); `/api/status` `rota_update_pending` | Outside the night window, or the quiet gate is blocked (incl. **your own** web session — gh#41). |
 | Retriever not staging a release | `/var/log/rota-pull.log` | Release has no `manifest-*.json` asset (looks non-ROTA), or it is a prerelease and cron runs without `--stage-prereleases`, or a sha256/size mismatch. |
 | Everything "looks" fine but no update | Confirm `seq` advanced | A non-monotonic `seq` is refused (downgrade). Check `bin/*/manifest-*.json` vs. the server. |
+| Any server-side doubt — or right after a store hand-edit | `sudo -u www-data tools/ota-store-check.sh /var/www/ota-store` | One read-only pass catches invalid JSON (fails-closed 204s), unstaged pins/channels, corrupt or missing artefacts, and duplicate `seq`. |
 
 ### Device audit codes (SD log / `logparser.py`)
 
@@ -641,7 +642,7 @@ python bin/ota_push.py bin/<version>/greenhouse-controller-<version>.bin --host 
 | Release tool + its docs | `bin/rota_release.py`, `bin/rota_release.md` — *firmware repo* |
 | Release master copies | `bin/<version>/` (bin, zip, `manifest-<version>.json`) — *firmware repo* |
 | Server endpoints | `public/manifest.php`, `public/download.php`, `public/lib/rota_lib.php` — *this repo* |
-| Retriever + store tools | `tools/ota-store-update.sh`, `init-store.sh`, `prune-releases.sh` — *this repo* |
+| Retriever + store tools | `tools/ota-store-update.sh`, `init-store.sh`, `prune-releases.sh`, `ota-store-check.sh` — *this repo* |
 | Server bootstrap | `tools/bootstrap.md` — *this repo* |
 | Store (VPS, outside webroot) | `/var/www/ota-store/` — `releases/`, `channels/`, `devices.json`, `checkins.csv`, `nonce-cache/` |
 | Device-activity + pull logs | `/var/log/rota-device.log`, `/var/log/rota-pull.log` |

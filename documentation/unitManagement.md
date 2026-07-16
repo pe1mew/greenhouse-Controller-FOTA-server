@@ -142,6 +142,7 @@ examples for every use case are in [cliManual.md](cliManual.md).)
 | # | Use case | Rationale |
 |---|---|---|
 | 12 | **Inspect state** | `rota_release.py status` for what each stream offers; `last_seen` / `fw_ver`, `checkins.csv`, and `/var/log/rota-device.log` for whether units check in and what they run. How you verify every use case above actually took effect, since changes only land on a unit's next check-in. |
+| 13 | **Validate the store** | `tools/ota-store-check.sh` — read-only syntax + consistency lint: `devices.json` (a malformed registry fails **closed** — every unit gets 204), `channels/*.json`, and every staged release (manifest fields; artefact size + SHA-256; `seq` uniqueness), plus pins/streams actually staged. The safety net after every hand-edit (UC1–UC6, UC11) and the first diagnostic when units unexpectedly get 204/404. |
 
 One use case exists only implicitly: **adding a new unit type** (a new column
 in the matrix). It is not a separate procedure — it emerges from publishing a
@@ -349,3 +350,24 @@ includes *Record telemetry + activity log line*, so observation data is a
 by-product of normal operation. As the note says, this is how every other use
 case is verified — since changes only take effect on a unit's next check-in,
 UC12 is the confirmation step that closes the loop on UC1–UC11.
+
+### UC13 — Validate the store (observation)
+
+![UC13 use-case diagram: operator or cron run a read-only store lint](images/uc13-validate-store.png)
+
+*Source: [uc13-validate-store.puml](images/uc13-validate-store.puml)*
+
+The second observation use case, and UC12's counterpart: where UC12 asks
+*"what is the system doing?"*, UC13 asks *"is the store itself well-formed and
+consistent?"*. The Operator (or an optional cron) runs
+`tools/ota-store-check.sh`, whose *Run* use case *includes* validating
+`devices.json` (valid JSON, 12-hex ids, secrets set — values never printed,
+channels known, pins staged), the channel files (shape; every pointed version
+staged with a manifest), and every staged release (manifest fields; artefact
+presence, size and SHA-256; `seq` uniqueness), then reports
+`[ OK ]`/`[WARN]`/`[FAIL]` lines and exits `0`/`1`. Nothing is modified and no
+secret value is ever displayed. The note carries the reason this use case
+exists: a malformed `devices.json` fails **closed** — the server rejects every
+unit with 204, indistinguishable from an auth failure — so the check belongs
+immediately after every hand-edit (UC1–UC6, UC11) and at the top of any
+"units suddenly get 204/404" diagnosis.
