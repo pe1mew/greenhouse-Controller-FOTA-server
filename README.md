@@ -21,6 +21,7 @@ The contract defines the endpoints, the `X-OTA-Auth` header (per-unit HMAC-SHA25
 | `tools/bootstrap.md` | One-time VPS setup: read-only deploy key, clone outside webroot, runtime dirs |
 | `tools/server-update.sh` | Runs on the VPS: `git pull` (fast-forward) + `sudo rsync` of `public/` into the webroot (PHP only; the nginx vhost is a one-time setup) |
 | `tools/ota-store-update.sh` | Runs on the VPS (cron): pulls the latest GitHub Release, verifies SHA-256, stages it into `ota-store/`, and points the soak channel |
+| `tools/ota-store-check.sh` | Read-only store lint: validates `devices.json`, `channels/*.json`, staged manifests + artefact sizes/SHA-256, seq uniqueness; exit 0/1 |
 | `.github/workflows/lint.yml` | CI: PHP lint + R-T07 credential scan |
 
 **Not in this repository, by design (R-T07):** private keys, certificates, device secrets, the live device registry (`devices.json`), check-in logs, and release artefacts. Runtime state lives in `ota-store/` on the VPS (outside the webroot); secrets live in the operator's secret store. `.gitignore` enforces this and CI scans for violations.

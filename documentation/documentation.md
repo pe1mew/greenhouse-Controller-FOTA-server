@@ -501,11 +501,11 @@ STORE=/var/www/ota-store
 # edit as root; validate; the server merges last_seen/fw_ver under a lock, so keep the edit quick
 sudo cp "$STORE/devices.json" /tmp/devices.json.bak
 sudoedit "$STORE/devices.json"          # or: sudo nano
-# validate before trusting it:
-sudo -u www-data php -r '$d=json_decode(file_get_contents("'"$STORE"'/devices.json")); echo $d===null?"INVALID JSON\n":"valid\n";'
+# validate before trusting it (JSON syntax + pins/channels/releases cross-checks):
+sudo -u www-data ~/greenhouse-Controller-FOTA-server/tools/ota-store-check.sh "$STORE"
 ```
 
-If it says `INVALID JSON`, restore the backup and try again. Because the server
+If it reports `[FAIL]` lines, restore the backup and try again. Because the server
 also writes `last_seen`/`fw_ver` atomically, avoid holding a stale copy open for
 long; editing when the target unit is not mid-check-in avoids any race.
 

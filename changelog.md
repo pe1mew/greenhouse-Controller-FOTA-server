@@ -55,6 +55,15 @@ Releases to the soak channel, and operation is fully documented.
   `prune-releases.sh`, `server-update.sh`, `rota-logrotate`), the registry
   hand-edit pattern (UC1–UC6), and a **use case → command mapping** with worked
   examples, cross-linked per use case to `unitManagement.md`.
+- **Store health check — `tools/ota-store-check.sh`** (2026-07-16). Read-only
+  syntax + consistency lint of the ota-store: `devices.json` (valid JSON,
+  12-hex keys, secrets set — values never printed, channels known, pins staged,
+  not world-readable), `channels/*.json` (shape; pointed versions staged),
+  `releases/<v>/` (manifest fields; artefact presence, size and SHA-256 —
+  `--quick` skips hashes; `seq` uniqueness), enabled-unit resolution, and
+  `checkins.csv` line format. Exit 0/1 (cron-friendly); run as
+  `sudo -u www-data`. A malformed `devices.json` fails closed (every unit
+  gets 204) — this catches it before a unit does.
 
 ### Changed
 - **`tools/server-update.sh`** (2026-07-14) now deploys **only** `public/`
